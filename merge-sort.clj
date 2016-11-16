@@ -1,17 +1,15 @@
-(defn merge-back
-  ([coll1] coll1)
+(defn merge-back 
+  ([coll] coll)
   ([coll1 coll2]
-   (loop [out []
-          [f1 & r1 :as c1] coll1
-          [f2 & r2 :as c2] coll2]
-     (cond (empty? c1) (concat out c2)
-           (empty? c2) (concat out c1)
-           :else
-           (let [least (min f1 f2)]
-             (cond (= least f1)
-                   (recur (conj out f1) r1 c2)
-                   (= least f2)
-                   (recur (conj out f2) r2 c1)))))))
+   (cond (empty? coll1) coll2
+         (empty? coll2) coll1
+         :else 
+         (lazy-seq
+          (let [[f1 & r1 :as c1] (seq coll1)
+                [f2 & r2 :as c2] (seq coll2)]
+            (if (<= f1 f2) 
+              (cons f1 (merge-back r1 c2))
+              (cons f2 (merge-back r2 c1))))))))
                
 (defn merge-sort [coll]
   (let [part #(partition-all 2 %)
