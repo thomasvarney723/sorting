@@ -12,17 +12,12 @@
                    (recur (conj out f1) r1 c2)
                    (= least f2)
                    (recur (conj out f2) r2 c1)))))))
-
-(defn sort2 [[a b]]
-  (if b
-    (if (< a b) [a b] [b a])
-    [a]))
                
 (defn merge-sort [coll]
   (let [part #(partition-all 2 %)
         map-apply-merge (partial map #(apply merge-back %))]
     (->> (reductions #(%2 %1)
-                    (map sort2 (part coll))
+                    (map vector coll)
                     (cycle [part map-apply-merge]))
          (drop-while #(> (count %) 1))
          first
