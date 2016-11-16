@@ -1,10 +1,3 @@
-(defn remove-once [value coll]
-  (lazy-seq
-   (when-let [s (seq coll)]
-     (if (= value (first coll))
-       (rest coll)
-       (cons (first coll) (remove-once value (rest coll)))))))
-
 (defn merge-back
   ([coll1] coll1)
   ([coll1 coll2]
@@ -16,15 +9,10 @@
            :else
            (let [least (min f1 f2)]
              (cond (= least f1)
-                   (recur (conj out f1)
-                          (remove-once f1 c1)
-                          c2)
+                   (recur (conj out f1) r1 c2)
                    (= least f2)
-                   (recur (conj out f2)
-                          (remove-once f2 c2)
-                          c1)))))))
+                   (recur (conj out f2) r2 c1)))))))
                
-
 (defn merge-sort [coll]
   (let [part #(partition-all 2 %)
         map-apply-merge (partial map #(apply merge-back %))]
