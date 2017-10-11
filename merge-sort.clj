@@ -1,20 +1,17 @@
-(defn merge-back 
+(defn merge-seqs
   ([coll] coll)
-  ([coll1 coll2]
-   (cond (empty? coll1) coll2
-         (empty? coll2) coll1
+  ([[h1 & t1 :as c1] [h2 & t2 :as c2]]
+   (cond (not h1) c2
+         (not h2) c1
          :else (lazy-seq
-                (let [[f1 & r1 :as c1] (seq coll1)
-                      [f2 & r2 :as c2] (seq coll2)]
-                  (if (<= f1 f2) 
-                    (cons f1 (merge-back r1 c2))
-                    (cons f2 (merge-back r2 c1))))))))
+                  (if (<= h1 h2) 
+                    (cons h1 (merge-seqs t1 c2))
+                    (cons h2 (merge-seqs t2 c1)))))))
+
+(defn merge-back [coll]
+  (map #(apply merge-seqs %) (partition-all 2 coll)))
                               
 (defn merge-sort [coll]
-  (letfn [(part [s]
-             (partition-all 2 s))
-          (map-apply-merge [s]
-             (map #(apply merge-back %) s))]
-    (->> (iterate (comp map-apply-merge part) (map vector coll))
-         (drop-while #(> (count %) 1))
-         ffirst))
+  (->> (iterate merge-back (map vector coll))
+       (drop-while #(> (count %) 1))
+       ffirst))
